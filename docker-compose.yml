@@ -1,0 +1,73 @@
+version: '3.9'
+
+services:
+  # Firebase Emulator Suite
+  firebase-emulator:
+    image: google/firebase-emulators-suite:latest
+    ports:
+      - "4000:4000"  # Emulator UI
+      - "8080:8080"  # Firestore
+      - "9099:9099"  # Authentication
+      - "5001:5001"  # Functions
+      - "5000:5000"  # Hosting
+    environment:
+      - FIRESTORE_EMULATOR_HOST=localhost:8080
+    volumes:
+      - ./firebase-emulator-data:/root/.config/firebase-emulator-suite
+
+  # Redis (para BullMQ - fila de processamento)
+  redis:
+    image: redis:7-alpine
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis-data:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # PostgreSQL (opcional - para sincronização de cache)
+  postgres:
+    image: postgres:16-alpine
+    ports:
+      - "5432:5432"
+    environment:
+      POSTGRES_DB: claudepp
+      POSTGRES_USER: claudepp
+      POSTGRES_PASSWORD: claudepp_dev
+    volumes:
+      - postgres-data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U claudepp"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # Backend (Uncomment para rodar no Docker)
+  # backend:
+  #   build:
+  #     context: packages/backend
+  #     dockerfile: Dockerfile
+  #   ports:
+  #     - "3000:3000"
+  #   environment:
+  #     - NODE_ENV=development
+  #     - FIRESTORE_EMULATOR_HOST=firebase-emulator:8080
+  #     - REDIS_URL=redis://redis:6379
+  #   depends_on:
+  #     - firebase-emulator
+  #     - redis
+  #   volumes:
+  #     - ./packages/backend:/app
+  #     - /app/node_modules
+
+volumes:
+  redis-data:
+  postgres-data:
+  firebase-emulator-data:
+
+networks:
+  default:
+    name: claudepp-network
