@@ -54,6 +54,30 @@ export interface User {
   storeId: string;
   active: boolean;
   createdAt: Date;
+  updatedAt?: Date;
+}
+
+export interface AuthTokenPayload {
+  sub: string;
+  email: string;
+  uid: string;
+  role: string;
+  storeId: string;
+  iat?: number;
+  exp?: number;
+}
+
+export interface LoginResponse {
+  accessToken: string;
+  user: User;
+}
+
+export interface RegisterRequest {
+  email: string;
+  password: string;
+  name: string;
+  role: string;
+  storeId: string;
 }
 
 export interface Store {
