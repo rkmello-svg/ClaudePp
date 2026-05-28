@@ -1,0 +1,76 @@
+export interface Sale {
+  id: string;
+  storeId: string;
+  cashierId: string;
+  items: SaleItem[];
+  subtotal: number;
+  discount: number;
+  tax: number;
+  total: number;
+  payment: PaymentInfo;
+  status: 'draft' | 'completed' | 'cancelled';
+  createdAt: Date;
+  updatedAt: Date;
+}
+
+export interface SaleItem {
+  id: string;
+  productId: string;
+  quantity: number;
+  unitPrice: number;
+  discount: number;
+  subtotal: number;
+}
+
+export interface Product {
+  id: string;
+  storeId: string;
+  name: string;
+  description: string;
+  barcode: string;
+  price: number;
+  cost: number;
+  stock: number;
+  category: string;
+  active: boolean;
+  createdAt: Date;
+  updatedAt: Date;
+}
+
+export interface PaymentInfo {
+  method: 'cash' | 'card' | 'check' | 'pix';
+  amount: number;
+  installments?: number;
+  cardBrand?: string;
+  transactionId?: string;
+  status: 'pending' | 'approved' | 'declined' | 'cancelled';
+}
+
+export interface User {
+  id: string;
+  email: string;
+  name: string;
+  role: 'admin' | 'manager' | 'cashier';
+  storeId: string;
+  active: boolean;
+  createdAt: Date;
+}
+
+export interface Store {
+  id: string;
+  name: string;
+  cnpj: string;
+  address: string;
+  phone: string;
+  email: string;
+  active: boolean;
+  createdAt: Date;
+  updatedAt: Date;
+}
+
+export interface ApiResponse<T> {
+  success: boolean;
+  data?: T;
+  error?: string;
+  timestamp: Date;
+}

@@ -1,0 +1,53 @@
+{
+  "name": "@claudepp/mobile",
+  "version": "0.1.0",
+  "description": "Mobile PDV - React Native + Expo",
+  "main": "node_modules/expo/AppEntry.js",
+  "scripts": {
+    "dev": "expo start",
+    "android": "expo start --android",
+    "ios": "expo start --ios",
+    "web": "expo start --web",
+    "build": "eas build",
+    "eject": "expo eject",
+    "lint": "eslint src --ext ts,tsx",
+    "type-check": "tsc --noEmit",
+    "format": "prettier --write \"src/**/*.{ts,tsx}\""
+  },
+  "dependencies": {
+    "expo": "^51.0.0",
+    "expo-router": "^3.3.0",
+    "react": "^18.2.0",
+    "react-native": "^0.74.0",
+    "zustand": "^4.4.4",
+    "@tanstack/react-query": "^5.28.0",
+    "axios": "^1.6.2",
+    "react-native-async-storage": "^1.0.0",
+    "react-native-sqlite-storage": "^6.0.0",
+    "react-native-bluetooth-classic": "^11.0.0"
+  },
+  "devDependencies": {
+    "@types/react": "^18.2.37",
+    "@types/react-native": "^0.73.0",
+    "typescript": "^5.3.3",
+    "eslint": "^8.55.0",
+    "@typescript-eslint/eslint-plugin": "^6.13.0",
+    "@typescript-eslint/parser": "^6.13.0",
+    "prettier": "^3.1.0"
+  },
+  "expo": {
+    "plugins": [
+      [
+        "expo-build-properties",
+        {
+          "android": {
+            "minSdkVersion": 24
+          },
+          "ios": {
+            "deploymentTarget": "13.0"
+          }
+        }
+      ]
+    ]
+  }
+}
