@@ -158,3 +158,4 @@ MIT
 
 **Status**: Em Desenvolvimento 🚀  
 **Versão**: 0.1.0
+>>>>>>> b1a491a (feat: initialize ClaudePP PDV monorepo project structure)

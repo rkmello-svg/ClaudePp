@@ -9,4 +9,13 @@ export class AppController {
   health() {
     return this.appService.health();
   }
+
+  @Get('api/v1/health')
+  apiHealth() {
+    return {
+      success: true,
+      status: 'OK',
+      timestamp: new Date(),
+    };
+  }
 }

@@ -54,3 +54,7 @@ coverage/
 # Runtime
 .env.local
 .env.*.local
+
+# Firebase
+firebase-key.json
+*.json.enc
