@@ -98,3 +98,69 @@ export interface ApiResponse<T> {
   error?: string;
   timestamp: Date;
 }
+
+// API Request/Response DTOs
+export interface LoginRequest {
+  email: string;
+  password: string;
+}
+
+export interface LoginResponse {
+  accessToken: string;
+  user: User;
+}
+
+export interface RegisterRequest {
+  email: string;
+  password: string;
+  name: string;
+  role: string;
+  storeId: string;
+}
+
+export interface CreateProductRequest {
+  name: string;
+  description?: string;
+  barcode: string;
+  price: number;
+  cost?: number;
+  stock?: number;
+  category?: string;
+}
+
+export interface CreateSaleRequest {
+  items: Array<{
+    productId: string;
+    quantity: number;
+    unitPrice: number;
+    discount?: number;
+  }>;
+  payment: PaymentInfo;
+  discountPercent?: number;
+  status?: 'draft' | 'completed';
+}
+
+export interface PaginatedResponse<T> {
+  data: T[];
+  pagination: {
+    page: number;
+    limit: number;
+    total: number;
+    pages: number;
+  };
+}
+
+export interface CartItem extends SaleItem {
+  name?: string;
+  description?: string;
+}
+
+export interface SearchProductsRequest {
+  query: string;
+  category?: string;
+  limit?: number;
+}
+
+export interface UpdateSaleStatusRequest {
+  status: 'draft' | 'completed' | 'cancelled';
+}
