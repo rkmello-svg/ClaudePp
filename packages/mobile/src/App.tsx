@@ -1,5 +1,6 @@
 import React from 'react';
 import { View, Text, StyleSheet } from 'react-native';
+import { APP_VERSION } from '@claudepp/shared';
 
 export default function App() {
   return (
@@ -7,7 +8,7 @@ export default function App() {
       <Text style={styles.title}>ClaudePP PDV Mobile</Text>
       <Text style={styles.subtitle}>Sistema PDV Híbrido Enterprise</Text>
       <Text style={styles.status}>✅ Mobile App inicializado com sucesso!</Text>
-      <Text style={styles.version}>Versão 0.1.0 - Fase 1: Configuração Base</Text>
+      <Text style={styles.version}>Versão {APP_VERSION} - Fase 1: Configuração Base</Text>
     </View>
   );
 }

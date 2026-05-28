@@ -1,4 +1,5 @@
 import { Injectable } from '@nestjs/common';
+import { APP_VERSION } from '@claudepp/shared';
 
 @Injectable()
 export class AppService {
@@ -6,7 +7,7 @@ export class AppService {
     return {
       status: 'ok',
       timestamp: new Date().toISOString(),
-      service: 'ClaudePP Backend v0.1.0',
+      service: `ClaudePP Backend v${APP_VERSION}`,
     };
   }
 }

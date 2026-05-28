@@ -1,3 +1,5 @@
+import { APP_VERSION } from '@claudepp/shared';
+
 export default function App() {
   return (
     <div className="min-h-screen bg-gray-100">
@@ -13,7 +15,7 @@ export default function App() {
           <h2 className="text-xl font-semibold mb-4">Status</h2>
           <p className="text-gray-600">Web PDV inicializado com sucesso! ✅</p>
           <p className="text-sm text-gray-500 mt-2">
-            Versão 0.1.0 - Fase 1: Configuração Base
+            Versão {APP_VERSION} - Fase 1: Configuração Base
           </p>
         </div>
       </main>

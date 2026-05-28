@@ -10,7 +10,7 @@ async function bootstrap() {
   // Global prefix
   app.setGlobalPrefix('api/v1');
 
-  const port = process.env.PORT || 3000;
+  const port = parseInt(process.env.PORT || '3000', 10);
   await app.listen(port);
 
   console.log(`✅ Backend rodando em http://localhost:${port}`);
