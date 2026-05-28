@@ -1,0 +1,56 @@
+# Dependencies
+node_modules/
+.pnp
+.pnp.js
+yarn.lock
+package-lock.json
+
+# Production/Build
+dist/
+build/
+.next/
+out/
+.expo/
+.expo-shared/
+.nuxt/
+
+# Misc
+.DS_Store
+*.pem
+.env
+.env.local
+.env.*.local
+.cache/
+
+# Logs
+logs/
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# SDKs proprietários (não commitar)
+packages/backend/src/integrations/tef/sdk/*/lib/
+packages/backend/src/integrations/tef/sdk/*/bin/
+sdks/
+/opt/tef-sdks/
+*.so
+*.dll
+*.dylib
+*.a
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+.DS_Store
+
+# Testing
+coverage/
+.nyc_output/
+
+# Runtime
+.env.local
+.env.*.local

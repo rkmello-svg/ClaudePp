@@ -1,0 +1,29 @@
+{
+  "name": "claudepp-pdv",
+  "version": "0.1.0",
+  "description": "Sistema PDV Híbrido Enterprise com Integração de Máquinas",
+  "private": true,
+  "workspaces": [
+    "packages/*"
+  ],
+  "scripts": {
+    "dev": "yarn workspaces foreach -p run dev",
+    "build": "yarn workspaces foreach -p run build",
+    "test": "yarn workspaces foreach -p run test",
+    "lint": "yarn workspaces foreach -p run lint",
+    "type-check": "yarn workspaces foreach -p run type-check",
+    "format": "prettier --write \"**/*.{ts,tsx,js,jsx,json,md}\"",
+    "backend:dev": "yarn workspace @claudepp/backend dev",
+    "web:dev": "yarn workspace @claudepp/web dev",
+    "mobile:dev": "yarn workspace @claudepp/mobile dev",
+    "shared:build": "yarn workspace @claudepp/shared build"
+  },
+  "devDependencies": {
+    "prettier": "^3.0.0",
+    "typescript": "^5.3.3"
+  },
+  "engines": {
+    "node": ">=20.0.0",
+    "yarn": ">=4.0.0"
+  }
+}
