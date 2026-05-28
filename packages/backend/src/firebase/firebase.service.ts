@@ -40,6 +40,14 @@ export class FirebaseService {
     return this.auth;
   }
 
+  /**
+   * Public getter for Firestore instance
+   * Used by services that need direct access to db
+   */
+  get db(): Firestore {
+    return this.firestore;
+  }
+
   async createUser(email: string, password: string, displayName: string) {
     try {
       const user = await this.auth.createUser({
@@ -80,6 +88,45 @@ export class FirebaseService {
     } catch (error) {
       this.logger.debug('Invalid ID token');
       return null;
+    }
+  }
+
+  /**
+   * Verify user password using Firebase REST API
+   * Returns true if password is valid, false otherwise
+   */
+  async verifyPassword(email: string, password: string): Promise<boolean> {
+    try {
+      const apiKey = process.env.FIREBASE_API_KEY;
+      if (!apiKey) {
+        this.logger.error('FIREBASE_API_KEY not configured');
+        return false;
+      }
+
+      const response = await fetch(
+        `https://identitytoolkit.googleapis.com/v1/accounts:signInWithPassword?key=${apiKey}`,
+        {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            email,
+            password,
+            returnSecureToken: true,
+          }),
+        }
+      );
+
+      if (!response.ok) {
+        this.logger.debug(`Password verification failed for ${email}`);
+        return false;
+      }
+
+      return true;
+    } catch (error) {
+      this.logger.error(`Error verifying password for ${email}`, error);
+      return false;
     }
   }
 

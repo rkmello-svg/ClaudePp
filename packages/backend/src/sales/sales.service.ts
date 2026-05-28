@@ -91,9 +91,12 @@ export class SalesService {
     endDate?: Date,
   ) {
     try {
-      let query = this.firestore
-        .collection(this.firebaseService.getCollectionPath(storeId, 'sales'))
-        .orderBy('createdAt', 'desc');
+      const salesCollection = this.firestore.collection(
+        this.firebaseService.getCollectionPath(storeId, 'sales')
+      );
+
+      // Build base query with filters
+      let query = salesCollection.orderBy('createdAt', 'desc');
 
       if (status) {
         query = query.where('status', '==', status) as any;
@@ -107,20 +110,28 @@ export class SalesService {
         query = query.where('createdAt', '<=', endDate) as any;
       }
 
-      const snapshot = await query.limit(limit * page).get();
+      // Get total count of filtered results
+      const countSnapshot = await query.get();
+      const total = countSnapshot.docs.length;
+
+      // Calculate pagination offset
       const offset = (page - 1) * limit;
 
-      const sales = snapshot.docs
-        .map((doc: any) => doc.data())
-        .slice(offset, offset + limit);
+      // Apply offset and limit for the current page
+      const snapshot = await query.offset(offset).limit(limit).get();
+
+      const sales = snapshot.docs.map((doc: any) => ({
+        id: doc.id,
+        ...doc.data(),
+      }));
 
       return {
         data: sales,
         pagination: {
           page,
           limit,
-          total: snapshot.docs.length,
-          pages: Math.ceil(snapshot.docs.length / limit),
+          total,
+          pages: Math.ceil(total / limit),
         },
       };
     } catch (error) {

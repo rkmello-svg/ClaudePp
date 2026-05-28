@@ -71,21 +71,33 @@ export class AuthService {
     const { email, password } = loginDto;
 
     try {
-      // In production, use Firebase REST API or Admin SDK custom token
-      // For MVP, we'll use JWT with Firebase email verification
+      // Validate email and password with Firebase Admin SDK
       const user = await this.firebaseService.getUserByEmail(email);
 
       if (!user) {
         throw new UnauthorizedException('Invalid credentials');
       }
 
-      // Generate JWT token
+      // Verify password by attempting to sign in via Firebase REST API
+      const isPasswordValid = await this.firebaseService.verifyPassword(email, password);
+      if (!isPasswordValid) {
+        throw new UnauthorizedException('Invalid credentials');
+      }
+
+      // Fetch user profile from Firestore to get actual role and storeId
+      const userProfile = await this.getUserProfileFromFirestore(user.uid);
+
+      if (!userProfile) {
+        throw new UnauthorizedException('User profile not found');
+      }
+
+      // Generate JWT token with correct role and storeId from Firestore
       const payload: AuthUser = {
         sub: user.uid,
         email: user.email || '',
         uid: user.uid,
-        role: 'cashier', // Default role, should be fetched from Firestore
-        storeId: '', // Should be fetched from Firestore
+        role: (userProfile as any).role || 'cashier',
+        storeId: (userProfile as any).storeId || '',
       };
 
       const token = this.jwtService.sign(payload);
@@ -101,6 +113,32 @@ export class AuthService {
     } catch (error) {
       this.logger.error(`Login failed for ${email}`, error);
       throw new UnauthorizedException('Invalid credentials');
+    }
+  }
+
+  /**
+   * Fetch user profile from Firestore across all stores
+   * Returns the first match found
+   */
+  private async getUserProfileFromFirestore(uid: string) {
+    try {
+      const storesSnapshot = await this.firestore.collection('stores').get();
+
+      for (const storeDoc of storesSnapshot.docs) {
+        const userDoc = await this.firestore
+          .collection(this.firebaseService.getCollectionPath(storeDoc.id, 'users'))
+          .doc(uid)
+          .get();
+
+        if (userDoc.exists) {
+          return { ...userDoc.data(), storeId: storeDoc.id };
+        }
+      }
+
+      return null;
+    } catch (error) {
+      this.logger.error(`Error fetching user profile: ${uid}`, error);
+      return null;
     }
   }
 

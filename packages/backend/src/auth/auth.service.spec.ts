@@ -14,14 +14,25 @@ describe('AuthService', () => {
   const mockFirebaseService = {
     getUserByEmail: jest.fn(),
     createUser: jest.fn(),
-    getFirestore: jest.fn(() => ({
-      collection: jest.fn(() => ({
-        doc: jest.fn(() => ({
+    verifyPassword: jest.fn(),
+    getFirestore: jest.fn().mockReturnValue({
+      collection: jest.fn().mockReturnValue({
+        doc: jest.fn().mockReturnValue({
           set: jest.fn().mockResolvedValue(undefined),
-          get: jest.fn().mockResolvedValue({ exists: true, data: () => ({}) }),
-        })),
-      })),
-    })),
+          get: jest.fn().mockResolvedValue({
+            exists: true,
+            data: () => ({ role: 'cashier', storeId: 'store-123' })
+          }),
+        }),
+        get: jest.fn().mockResolvedValue({
+          docs: [
+            {
+              id: 'store-123',
+            },
+          ],
+        }),
+      }),
+    }),
     getCollectionPath: jest.fn((storeId, collection) => `stores/${storeId}/${collection}`),
   };
 
@@ -100,7 +111,7 @@ describe('AuthService', () => {
   });
 
   describe('login', () => {
-    it('should login user and return token', async () => {
+    it('should login user and return token with correct role and storeId', async () => {
       const loginDto: LoginDto = {
         email: 'test@example.com',
         password: 'password123',
@@ -112,11 +123,18 @@ describe('AuthService', () => {
         displayName: 'Test User',
       });
 
+      mockFirebaseService.verifyPassword.mockResolvedValue(true);
+
       const result = await service.login(loginDto);
 
       expect(result).toHaveProperty('accessToken');
       expect(result.user.email).toBe('test@example.com');
-      expect(mockJwtService.sign).toHaveBeenCalled();
+      expect(mockJwtService.sign).toHaveBeenCalledWith(
+        expect.objectContaining({
+          role: 'cashier',
+          storeId: 'store-123',
+        })
+      );
     });
 
     it('should throw UnauthorizedException if user not found', async () => {
@@ -126,6 +144,23 @@ describe('AuthService', () => {
       };
 
       mockFirebaseService.getUserByEmail.mockResolvedValue(null);
+
+      await expect(service.login(loginDto)).rejects.toThrow(UnauthorizedException);
+    });
+
+    it('should throw UnauthorizedException if password is invalid', async () => {
+      const loginDto: LoginDto = {
+        email: 'test@example.com',
+        password: 'wrongpassword',
+      };
+
+      mockFirebaseService.getUserByEmail.mockResolvedValue({
+        uid: 'user-123',
+        email: 'test@example.com',
+        displayName: 'Test User',
+      });
+
+      mockFirebaseService.verifyPassword.mockResolvedValue(false);
 
       await expect(service.login(loginDto)).rejects.toThrow(UnauthorizedException);
     });

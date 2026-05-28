@@ -9,8 +9,8 @@ describe('ProductsService', () => {
   let firebaseService: FirebaseService;
 
   const mockFirebaseService = {
-    getFirestore: jest.fn(() => ({
-      collection: jest.fn(() => ({
+    getFirestore: jest.fn().mockReturnValue({
+      collection: jest.fn().mockReturnValue({
         doc: jest.fn((id: string) => ({
           set: jest.fn().mockResolvedValue(undefined),
           get: jest.fn().mockResolvedValue({
@@ -25,7 +25,7 @@ describe('ProductsService', () => {
           }),
           update: jest.fn().mockResolvedValue(undefined),
         })),
-        where: jest.fn(() => ({
+        where: jest.fn().mockReturnValue({
           where: jest.fn().mockReturnThis(),
           limit: jest.fn().mockReturnThis(),
           get: jest.fn().mockResolvedValue({
@@ -42,10 +42,10 @@ describe('ProductsService', () => {
               },
             ],
           }),
-        })),
+        }),
         limit: jest.fn().mockReturnThis(),
-      })),
-    })),
+      }),
+    }),
     getCollectionPath: jest.fn((storeId, collection) => `stores/${storeId}/${collection}`),
   };
 
@@ -92,12 +92,15 @@ describe('ProductsService', () => {
     it('should return product by id', async () => {
       const result = await service.getProductById('store-123', 'prod-1');
 
-      expect(result).toHaveProperty('id');
-      expect(result.name).toBe('Test Product');
+      expect(result).toBeDefined();
+      if (result) {
+        expect(result).toHaveProperty('id');
+        expect(result.name).toBe('Test Product');
+      }
     });
 
     it('should throw NotFoundException if product not found', async () => {
-      (mockFirebaseService.getFirestore().collection().doc().get as jest.Mock).mockResolvedValueOnce(
+      (mockFirebaseService.getFirestore().collection().doc().get as jest.Mock).mockResolvedValue(
         {
           exists: false,
         },

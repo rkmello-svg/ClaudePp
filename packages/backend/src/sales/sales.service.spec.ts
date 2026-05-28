@@ -9,8 +9,8 @@ describe('SalesService', () => {
   let firebaseService: FirebaseService;
 
   const mockFirebaseService = {
-    getFirestore: jest.fn(() => ({
-      collection: jest.fn(() => ({
+    getFirestore: jest.fn().mockReturnValue({
+      collection: jest.fn().mockReturnValue({
         doc: jest.fn((id: string) => ({
           set: jest.fn().mockResolvedValue(undefined),
           get: jest.fn().mockResolvedValue({
@@ -25,7 +25,7 @@ describe('SalesService', () => {
           }),
           update: jest.fn().mockResolvedValue(undefined),
         })),
-        where: jest.fn(() => ({
+        where: jest.fn().mockReturnValue({
           where: jest.fn().mockReturnThis(),
           orderBy: jest.fn().mockReturnThis(),
           limit: jest.fn().mockReturnThis(),
@@ -43,14 +43,16 @@ describe('SalesService', () => {
               },
             ],
           }),
-        })),
-        orderBy: jest.fn(() => ({
+        }),
+        orderBy: jest.fn().mockReturnValue({
           where: jest.fn().mockReturnThis(),
+          offset: jest.fn().mockReturnThis(),
           limit: jest.fn().mockReturnThis(),
           get: jest.fn().mockResolvedValue({
             empty: false,
             docs: [
               {
+                id: 'sale-1',
                 data: () => ({
                   id: 'sale-1',
                   total: 100,
@@ -61,10 +63,10 @@ describe('SalesService', () => {
               },
             ],
           }),
-        })),
+        }),
         onSnapshot: jest.fn(),
-      })),
-    })),
+      }),
+    }),
     getCollectionPath: jest.fn((storeId, collection) => `stores/${storeId}/${collection}`),
   };
 
@@ -120,12 +122,15 @@ describe('SalesService', () => {
     it('should return sale by id', async () => {
       const result = await service.getSaleById('store-123', 'sale-1');
 
-      expect(result).toHaveProperty('id');
-      expect(result.total).toBe(100);
+      expect(result).toBeDefined();
+      if (result) {
+        expect(result).toHaveProperty('id');
+        expect(result.total).toBe(100);
+      }
     });
 
     it('should throw NotFoundException if sale not found', async () => {
-      (mockFirebaseService.getFirestore().collection().doc().get as jest.Mock).mockResolvedValueOnce({
+      mockFirebaseService.getFirestore().collection().doc().get.mockResolvedValueOnce({
         exists: false,
       });
 
@@ -140,6 +145,18 @@ describe('SalesService', () => {
       const result = await service.cancelSale('store-123', 'sale-1');
 
       expect(result).toHaveProperty('status');
+    });
+  });
+
+  describe('listSales', () => {
+    it('should return paginated sales with correct offset and limit', async () => {
+      const result = await service.listSales('store-123', 1, 20);
+
+      expect(result).toHaveProperty('data');
+      expect(result).toHaveProperty('pagination');
+      expect(result.data).toHaveLength(1);
+      expect(result.pagination.page).toBe(1);
+      expect(result.pagination.limit).toBe(20);
     });
   });
 

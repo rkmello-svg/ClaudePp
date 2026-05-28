@@ -1,4 +1,4 @@
-import { Controller, Post, Get, Body, Param, UseGuards, Request } from '@nestjs/common';
+import { Controller, Post, Get, Body, Param, UseGuards, Request, BadRequestException } from '@nestjs/common';
 import { PaymentsService } from './payments.service';
 import { ProcessPaymentDto } from './dto/process-payment.dto';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
@@ -10,6 +10,18 @@ export class PaymentsController {
 
   @Post('process-card')
   async processCardPayment(@Body() dto: ProcessPaymentDto, @Request() req) {
+    // Validate cardData is present for card payments
+    if (dto.method === 'card') {
+      if (!dto.cardData) {
+        throw new BadRequestException('Card data is required for card payments');
+      }
+
+      // Validate required card fields
+      if (!dto.cardData.number || !dto.cardData.holderName || !dto.cardData.cvv) {
+        throw new BadRequestException('Invalid card data - missing required fields');
+      }
+    }
+
     return this.paymentsService.processCardPayment(dto, req.user.storeId);
   }
 

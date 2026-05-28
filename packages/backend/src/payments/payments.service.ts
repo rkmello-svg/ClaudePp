@@ -32,6 +32,11 @@ export class PaymentsService {
     }
 
     try {
+      // Validate cardData is present
+      if (!dto.cardData) {
+        throw new Error('Card data is required for card payments');
+      }
+
       const response = await provider.processCardPayment({
         amount: dto.amount,
         installments: dto.installments,
@@ -72,16 +77,28 @@ export class PaymentsService {
 
       return transaction;
     } catch (error) {
-      this.logger.error(`Payment processing failed: ${error.message}`);
+      this.logger.error(
+        `Payment processing failed: ${error instanceof Error ? error.message : 'Unknown error'}`,
+      );
       throw error;
     }
   }
 
   async processPixPayment(dto: ProcessPaymentDto, storeId: string): Promise<PaymentTransaction> {
     this.logger.log(`Processing PIX payment for sale: ${dto.saleId}`);
-    
+
     const transactionId = uuid();
     const provider = this.providers.get('stone');
+
+    // Validate provider is configured
+    if (!provider) {
+      throw new Error('PIX payment provider not configured');
+    }
+
+    // Validate pixData is present
+    if (!dto.pixData) {
+      throw new Error('PIX data is required for PIX payments');
+    }
 
     const response = await provider.processPixPayment({
       amount: dto.amount,
@@ -116,9 +133,14 @@ export class PaymentsService {
 
   async processCashPayment(dto: ProcessPaymentDto, storeId: string): Promise<PaymentTransaction> {
     this.logger.log(`Processing cash payment for sale: ${dto.saleId}`);
-    
+
     const transactionId = uuid();
     const provider = this.providers.get('stone');
+
+    // Validate provider is configured
+    if (!provider) {
+      throw new Error('Cash payment provider not configured');
+    }
 
     const response = await provider.processCashPayment({
       amount: dto.amount,

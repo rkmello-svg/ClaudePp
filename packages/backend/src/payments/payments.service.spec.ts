@@ -80,4 +80,22 @@ describe('PaymentsService', () => {
     expect(result.status).toBe('approved');
     expect(result.method).toBe('card');
   });
+
+  it('should throw error when PIX provider is not configured', async () => {
+    // Create a new service without providers to test null check
+    const testService = new PaymentsService(firebaseService, null as any, null as any, null as any);
+
+    const dto = {
+      saleId: '123',
+      amount: 100,
+      method: 'pix' as const,
+      pixData: {
+        cpfCnpj: '12345678901234',
+      },
+    };
+
+    await expect(testService.processPixPayment(dto, 'store-123')).rejects.toThrow(
+      'PIX payment provider not configured'
+    );
+  });
 });

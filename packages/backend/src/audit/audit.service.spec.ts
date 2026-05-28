@@ -33,6 +33,7 @@ describe('AuditService', () => {
       action: 'CREATE',
       resource: 'PRODUCT',
       resourceId: 'product-1',
+      storeId: 'store-1',
       status: 'success',
     });
     expect(log).toBeDefined();
