@@ -1,5 +1,30 @@
 import { z } from 'zod';
 
+// Authentication Schemas
+export const LoginSchema = z.object({
+  email: z.string().email('Email inválido'),
+  password: z.string().min(6, 'Senha deve ter no mínimo 6 caracteres'),
+});
+
+export const RegisterSchema = z.object({
+  email: z.string().email('Email inválido'),
+  password: z.string().min(6, 'Senha deve ter no mínimo 6 caracteres'),
+  name: z.string().min(1, 'Nome é obrigatório'),
+  role: z.enum(['admin', 'manager', 'cashier']),
+  storeId: z.string().min(1, 'ID da loja é obrigatório'),
+});
+
+export const UserSchema = z.object({
+  id: z.string().uuid(),
+  email: z.string().email(),
+  name: z.string(),
+  role: z.enum(['admin', 'manager', 'cashier']),
+  storeId: z.string().uuid(),
+  active: z.boolean().default(true),
+  createdAt: z.date(),
+  updatedAt: z.date().optional(),
+});
+
 export const PaymentMethodSchema = z.enum(['cash', 'card', 'check', 'pix']);
 
 export const PaymentInfoSchema = z.object({
