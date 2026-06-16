@@ -24,6 +24,7 @@
     "date-fns": "^3.6.0",
     "zod": "^3.22.4",
     "react-hook-form": "^7.51.3",
+    "@hookform/resolvers": "^3.3.4",
     "recharts": "^2.12.0",
     "clsx": "^2.1.0",
     "axios": "^1.7.2"

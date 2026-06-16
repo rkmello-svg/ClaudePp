@@ -1,0 +1,60 @@
+# Supabase Project Configuration
+
+[project]
+# Defaults to the working directory name
+name = "erp-enterprise-os"
+description = ""
+
+# Supabase API version
+api_version = "2024-06-16"
+
+# Database default schema
+database_default_schema = "public"
+
+# PostgreSQL dialect
+postgresql_version = "15"
+
+[db]
+seed_file_path = "seed.sql"
+
+[api]
+enabled = true
+port = 54321
+schemas = ["public", "graphql_public"]
+extra_search_path = ["public", "extensions"]
+max_rows = 1000
+
+[realtime]
+enabled = true
+max_bytes_per_second = 1048576
+max_concurrent_users = 200
+max_events_per_second = 1000
+
+[auth]
+enable_signup = true
+enable_email_signup = true
+enable_phone_signup = false
+email_max_frequency = "12 hours"
+sms_max_frequency = "60 seconds"
+external_email_enabled = true
+external_phone_enabled = false
+external_oauth_providers = ["google", "github"]
+jwt_expiry = 3600
+jwt_default_group_name = "authenticated"
+jwt_aud = "authenticated"
+enable_refresh_token_rotation = true
+refresh_token_reuse_interval = 10
+enable_ssl = true
+user_id_check_constraint = true
+
+[extensions]
+# Vector operations (for future AI embeddings)
+vector = "0.5.0"
+# UUID functions
+uuid-ossp = "1.0"
+# pgcrypto for encryption
+pgcrypto = "1.0"
+# HTTP for external APIs
+http = "1.0"
+# JSON functions
+json = "1.0"
