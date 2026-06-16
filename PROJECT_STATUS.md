@@ -2,6 +2,7 @@
 
 **Last Updated**: 2026-06-16
 **Phases scaffolded**: 5 / 5
+**Features added**: AI wired + Form Builder + Communication Hub
 **Build**: ✅ `tsc` clean · `vite build` passes · `eslint` 0 errors · 11 unit tests passing
 
 ---
@@ -37,19 +38,42 @@ npx vitest run        # 11 tests passing
 - ⚠️ SEFAZ / eSocial transmission is **simulated** — integration points are
   isolated in `submitToSEFAZ` / `submitToeSocial` for real wiring later.
 
-## Phase 4 — AI ✅
+## Phase 4 — AI ✅ (Enhanced with LLM)
 - BaseAgent framework + Sales / Inventory / Finance agents
-- Heuristic, data-driven analysis (trends, EOQ, cash flow, churn risk)
-- Migration `003` adds `ai_agent_executions` (agents previously logged to a
-  table that did not exist)
-- ⚠️ Agents use deterministic heuristics, not an LLM yet. LLM wiring is the
-  next step (Claude API).
+- **LLM Provider abstraction**: Claude (✅ ready), OpenAI (skeleton), Gemini (skeleton)
+- **Claude API wired** to agents: Sales trends, Finance strategy, Inventory optimization
+- Agents send structured data context to LLM for intelligent reasoning
+- Fallback to heuristic analysis if API key missing
+- Migration `003` adds `ai_agent_executions` with execution logging
+- Agents generate natural-language insights (not just heuristic rules)
 
 ## Phase 5 — Marketplace + Business DNA ✅
 - Marketplace catalog (8 seeded official modules), 1-click install/uninstall
 - `vertical_configurations` + per-segment config (`src/config/verticals.ts`)
 - Dashboard rewritten as adaptive "Central de Operações"
 - Migration `004_marketplace_schema.sql`
+
+## Phase 6 — Form Builder ✅ (NEW)
+- **FormBuilderService**: CRUD for dynamic forms
+- **FormRenderer**: Display forms with zod validation
+- **FormEditor**: Drag-and-drop form builder UI
+- 10 field types: text, email, phone, number, date, select, checkbox, textarea, radio, file
+- Forms table with RLS (company-scoped)
+- Form submissions tracking + audit logging
+- Reusable across automations, modules, custom workflows
+- Migration `005_form_builder_schema.sql`
+
+## Phase 6.5 — Communication Hub ✅ (NEW)
+- **6 Channels**: WhatsApp, Email, SMS, Instagram, Facebook, Telegram
+- **CommunicationService**: Unified API for channels, contacts, threads, messages
+- Thread management with unread count, status (open/closed/archived)
+- Contact tracking with multi-channel identifiers
+- Message status: pending, sent, delivered, read, failed
+- Conversation analytics: summary by day, active contacts, channels breakdown
+- Communication page: 4-column layout (channels, threads, messages, composer)
+- Full RLS policies + audit logging
+- Migration `006_communication_schema.sql`
+- ⚠️ Channel providers (WhatsApp, Email, SMS, etc.) are skeleton — ready for real integration
 
 ---
 
@@ -61,13 +85,14 @@ npx vitest run        # 11 tests passing
 ---
 
 ## Known limitations / next steps
-1. Fiscal transmission (SEFAZ, eSocial) is simulated — needs real certificates
+1. **Fiscal transmission** (SEFAZ, eSocial) is simulated — needs real certificates
    and webservice integration.
-2. AI agents are heuristic — wire to Claude API for natural-language reasoning.
-3. No E2E tests yet; unit tests cover pure logic (format, verticals).
-4. Several service helpers use `any` for Supabase payloads (advisory warnings).
-5. Builders (Module/Form/Workflow/Dashboard) and Communication Hub from the
-   product vision are not yet implemented.
+2. **Communication channels** (WhatsApp, Email, SMS, etc.) are skeleton implementations —
+   need real provider APIs wired (Twilio, SendGrid, Meta, Telegram Bot API, etc.).
+3. **Workflow Builder** — automate business processes visually (not yet implemented).
+4. **Dashboard Builder** — custom KPI dashboards per vertical (not yet implemented).
+5. **E2E tests** — Cypress/Playwright smoke tests for critical flows (not yet implemented).
+6. Several service helpers use `any` for Supabase payloads (advisory warnings — not blocking).
 
 ---
 
@@ -78,6 +103,8 @@ npx vitest run        # 11 tests passing
 | 002_fiscal_schema.sql | NF-e, eSocial, SPED, obligations |
 | 003_ai_and_security_schema.sql | AI tables + invoice_items RLS fix |
 | 004_marketplace_schema.sql | Marketplace + verticals (seeded) |
+| 005_form_builder_schema.sql | Forms, submissions, drag-drop builder |
+| 006_communication_schema.sql | Channels, contacts, threads, messages |
 
 ## Commands
 ```bash
