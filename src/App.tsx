@@ -1,18 +1,23 @@
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom'
 import { useAuth } from '@/hooks/useAuth'
 import { useAuthStore } from '@/stores/authStore'
-import { useEffect } from 'react'
+import { useEffect, lazy, Suspense, ReactNode } from 'react'
 import { DashboardLayout } from '@/layouts/DashboardLayout'
-
-// Pages
-import LoginPage from '@/pages/auth/LoginPage'
-import OnboardingPage from '@/pages/onboarding/OnboardingPage'
-import DashboardPage from '@/pages/dashboard/DashboardPage'
-import CustomersPage from '@/pages/crm/CustomersPage'
-import ProductsPage from '@/pages/products/ProductsPage'
-import InvoicesPage from '@/pages/invoices/InvoicesPage'
-import FiscalPage from '@/pages/fiscal/FiscalPage'
 import LoadingPage from '@/pages/LoadingPage'
+
+// Lazy-loaded pages — each becomes its own chunk to keep the initial bundle small.
+const LoginPage = lazy(() => import('@/pages/auth/LoginPage'))
+const OnboardingPage = lazy(() => import('@/pages/onboarding/OnboardingPage'))
+const DashboardPage = lazy(() => import('@/pages/dashboard/DashboardPage'))
+const CustomersPage = lazy(() => import('@/pages/crm/CustomersPage'))
+const ProductsPage = lazy(() => import('@/pages/products/ProductsPage'))
+const InvoicesPage = lazy(() => import('@/pages/invoices/InvoicesPage'))
+const FiscalPage = lazy(() => import('@/pages/fiscal/FiscalPage'))
+const MarketplacePage = lazy(() => import('@/pages/marketplace/MarketplacePage'))
+
+function dashboard(page: ReactNode) {
+  return <DashboardLayout>{page}</DashboardLayout>
+}
 
 function App() {
   const { user, loading } = useAuth()
@@ -30,63 +35,31 @@ function App() {
 
   return (
     <Router>
-      <Routes>
-        {!user ? (
-          <>
-            <Route path="/auth/login" element={<LoginPage />} />
-            <Route path="*" element={<Navigate to="/auth/login" replace />} />
-          </>
-        ) : isOnboarding ? (
-          <>
-            <Route path="/onboarding" element={<OnboardingPage />} />
-            <Route path="*" element={<Navigate to="/onboarding" replace />} />
-          </>
-        ) : (
-          <>
-            <Route
-              path="/dashboard"
-              element={
-                <DashboardLayout>
-                  <DashboardPage />
-                </DashboardLayout>
-              }
-            />
-            <Route
-              path="/crm/customers"
-              element={
-                <DashboardLayout>
-                  <CustomersPage />
-                </DashboardLayout>
-              }
-            />
-            <Route
-              path="/products"
-              element={
-                <DashboardLayout>
-                  <ProductsPage />
-                </DashboardLayout>
-              }
-            />
-            <Route
-              path="/invoices"
-              element={
-                <DashboardLayout>
-                  <InvoicesPage />
-                </DashboardLayout>
-              }
-            />
-            <Route
-              path="/fiscal"
-              element={
-                <DashboardLayout>
-                  <FiscalPage />
-                </DashboardLayout>
-              }
-            />
-            <Route path="/" element={<Navigate to="/dashboard" replace />} />
-          </>
-        )}
-      </Routes>
+      <Suspense fallback={<LoadingPage />}>
+        <Routes>
+          {!user ? (
+            <>
+              <Route path="/auth/login" element={<LoginPage />} />
+              <Route path="*" element={<Navigate to="/auth/login" replace />} />
+            </>
+          ) : isOnboarding ? (
+            <>
+              <Route path="/onboarding" element={<OnboardingPage />} />
+              <Route path="*" element={<Navigate to="/onboarding" replace />} />
+            </>
+          ) : (
+            <>
+              <Route path="/dashboard" element={dashboard(<DashboardPage />)} />
+              <Route path="/crm/customers" element={dashboard(<CustomersPage />)} />
+              <Route path="/products" element={dashboard(<ProductsPage />)} />
+              <Route path="/invoices" element={dashboard(<InvoicesPage />)} />
+              <Route path="/fiscal" element={dashboard(<FiscalPage />)} />
+              <Route path="/marketplace" element={dashboard(<MarketplacePage />)} />
+              <Route path="/" element={<Navigate to="/dashboard" replace />} />
+            </>
+          )}
+        </Routes>
+      </Suspense>
     </Router>
   )
 }

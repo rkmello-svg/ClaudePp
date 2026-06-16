@@ -10,6 +10,8 @@ import {
   Users,
   Package,
   FileText,
+  Receipt,
+  Store,
   Settings,
   ChevronDown,
 } from 'lucide-react'
@@ -34,7 +36,8 @@ export function DashboardLayout({ children }: DashboardLayoutProps) {
     { name: 'Clientes', href: '/crm/customers', icon: Users },
     { name: 'Produtos', href: '/products', icon: Package },
     { name: 'Invoices', href: '/invoices', icon: FileText },
-    { name: 'Fiscal', href: '/fiscal', icon: FileText },
+    { name: 'Fiscal', href: '/fiscal', icon: Receipt },
+    { name: 'Marketplace', href: '/marketplace', icon: Store },
   ]
 
   return (
