@@ -324,7 +324,7 @@ export class NFeService {
 </eventoCancNFe>`
   }
 
-  private static async submitToSEFAZ(xmlContent: string, nfeKey: string) {
+  private static async submitToSEFAZ(_xmlContent: string, _nfeKey: string) {
     try {
       // In production, implement real SEFAZ integration
       // For now, simulate authorization
@@ -342,7 +342,7 @@ export class NFeService {
     }
   }
 
-  private static async submitCancellationToSEFAZ(cancellationXML: string) {
+  private static async submitCancellationToSEFAZ(_cancellationXML: string) {
     try {
       return {
         status: 'cancelled',

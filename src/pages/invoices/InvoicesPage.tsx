@@ -88,7 +88,7 @@ export default function InvoicesPage() {
     {
       key: 'status',
       header: 'Status',
-      render: (status) => {
+      render: (status: InvoiceStatus) => {
         const statusColors: Record<InvoiceStatus, string> = {
           draft: 'bg-gray-100 text-gray-800',
           issued: 'bg-blue-100 text-blue-800',
@@ -114,9 +114,9 @@ export default function InvoicesPage() {
 
   const statusTabs: { label: string; value: InvoiceStatus | 'all' }[] = [
     { label: 'Todas', value: 'all' },
-    { label: 'Emitidas', value: 'issued' },
-    { label: 'Pagas', value: 'paid' },
-    { label: 'Vencidas', value: 'overdue' },
+    { label: 'Emitidas', value: InvoiceStatus.ISSUED },
+    { label: 'Pagas', value: InvoiceStatus.PAID },
+    { label: 'Vencidas', value: InvoiceStatus.OVERDUE },
   ]
 
   return (

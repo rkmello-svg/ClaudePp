@@ -71,7 +71,7 @@ Use fórmulas como: EOQ, Ponto de Reposição, Estoque de Segurança.`
     }
   }
 
-  private async getInventoryHealth(params: Record<string, any>) {
+  private async getInventoryHealth(_params: Record<string, any>) {
     const { data: products } = await supabase
       .from('products')
       .select('*')
@@ -107,7 +107,7 @@ Use fórmulas como: EOQ, Ponto de Reposição, Estoque de Segurança.`
     }
   }
 
-  private async calculateReorderQuantities(params: Record<string, any>) {
+  private async calculateReorderQuantities(_params: Record<string, any>) {
     const { data: products } = await supabase
       .from('products')
       .select('*')
@@ -152,7 +152,7 @@ Use fórmulas como: EOQ, Ponto de Reposição, Estoque de Segurança.`
     }
   }
 
-  private async identifyInventoryIssues(params: Record<string, any>) {
+  private async identifyInventoryIssues(_params: Record<string, any>) {
     const { data: products } = await supabase
       .from('products')
       .select('*')

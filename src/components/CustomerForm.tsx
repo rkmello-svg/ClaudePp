@@ -36,7 +36,18 @@ export function CustomerForm({ customer, companyId, branchId, onSuccess, onCance
     formState: { errors },
   } = useForm<CustomerFormData>({
     resolver: zodResolver(customerSchema),
-    defaultValues: customer || {},
+    defaultValues: customer
+      ? {
+          name: customer.name,
+          email: customer.email ?? '',
+          phone: customer.phone ?? '',
+          cpf_cnpj: customer.cpf_cnpj ?? '',
+          address: customer.address ?? '',
+          city: customer.city ?? '',
+          state: customer.state ?? '',
+          zip_code: customer.zip_code ?? '',
+        }
+      : undefined,
   })
 
   const onSubmit = async (data: CustomerFormData) => {

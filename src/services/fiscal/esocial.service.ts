@@ -34,6 +34,25 @@ export class eSocialService {
     return data as eSocialEvent
   }
 
+  static async generatePayrollEvent(companyId: string, payrollData: any) {
+    const xmlContent = this.generatePayrollXML(payrollData)
+
+    const { data, error } = await supabase
+      .from('esocial_events')
+      .insert([{
+        company_id: companyId,
+        event_type: 'payroll',
+        event_version: '2.5.0',
+        xml_content: xmlContent,
+        status: 'draft',
+      }])
+      .select()
+      .single()
+
+    if (error) throw error
+    return data as eSocialEvent
+  }
+
   static async transmitEvent(eventId: string) {
     const { data: event, error: eventError } = await supabase
       .from('esocial_events')
@@ -113,7 +132,7 @@ export class eSocialService {
 </eSocial>`
   }
 
-  private static generatePayrollXML(companyId: string, payrollData: any): string {
+  private static generatePayrollXML(payrollData: any): string {
     return `<?xml version="1.0" encoding="UTF-8"?>
 <eSocial>
   <evtInfoComplPer Id="ID0202411290000000000150011001">
@@ -140,7 +159,7 @@ export class eSocialService {
 </eSocial>`
   }
 
-  private static async submitToeSocial(xmlContent: string) {
+  private static async submitToeSocial(_xmlContent: string) {
     try {
       // In production, implement real eSocial integration
       // For now, simulate transmission

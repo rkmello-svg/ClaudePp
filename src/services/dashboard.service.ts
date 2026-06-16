@@ -15,7 +15,6 @@ export interface DashboardMetrics {
 export class DashboardService {
   static async getMetrics(companyId: string): Promise<DashboardMetrics> {
     const today = new Date()
-    const thirtyDaysAgo = new Date(today.getTime() - 30 * 24 * 60 * 60 * 1000)
     const ninetyDaysAgo = new Date(today.getTime() - 90 * 24 * 60 * 60 * 1000)
 
     // Total revenue (all time)
@@ -119,7 +118,8 @@ export class DashboardService {
   private static async getTopProducts(companyId: string) {
     const { data: items } = await supabase
       .from('invoice_items')
-      .select('product_id, quantity, total')
+      .select('product_id, quantity, total, invoices!inner(company_id)')
+      .eq('invoices.company_id', companyId)
       .order('total', { ascending: false })
       .limit(5)
 

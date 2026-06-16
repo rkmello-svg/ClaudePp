@@ -90,13 +90,21 @@ export type Customer = {
 export type Invoice = {
   id: string
   company_id: string
-  branch_id: string
-  customer_id: string
+  branch_id: string | null
+  customer_id: string | null
   number: string
+  series: string | null
   issue_date: string
-  due_date: string
+  due_date: string | null
+  subtotal: number
+  tax: number
+  discount: number
   total_amount: number
   status: InvoiceStatus
+  nfe_key: string | null
+  nfe_number: string | null
+  nfe_status: string | null
+  notes: string | null
   created_at: string
   updated_at: string
 }

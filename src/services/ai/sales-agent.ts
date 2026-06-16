@@ -120,7 +120,7 @@ Sempre cite dados e números específicos. Forneça recomendações acionáveis.
       .select('id, name, email')
       .eq('company_id', this.company_id)
 
-    if (!customers) return { at_risk_customers: [] }
+    if (!customers) return { at_risk_count: 0, at_risk_customers: [] }
 
     const atRiskCustomers = []
 
@@ -158,7 +158,7 @@ Sempre cite dados e números específicos. Forneça recomendações acionáveis.
     }
   }
 
-  private async getRecommendations(params: Record<string, any>) {
+  private async getRecommendations(_params: Record<string, any>) {
     const trends = await this.analyzeTrends({ period: 90 })
     const atRisk = await this.identifyAtRiskCustomers({ days: 30 })
 

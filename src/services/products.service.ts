@@ -100,7 +100,7 @@ export class ProductsService {
   }
 
   static async updateStock(productId: string, quantity: number) {
-    const { data: product } = await this.get(productId)
+    const product = await this.get(productId)
     const newQuantity = (product?.stock_quantity || 0) + quantity
 
     return this.update(productId, { stock_quantity: Math.max(0, newQuantity) })

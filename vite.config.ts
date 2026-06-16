@@ -14,7 +14,7 @@ export default defineConfig({
     open: true,
   },
   build: {
-    target: 'ES2020',
-    minify: 'terser',
+    target: 'es2020',
+    minify: 'esbuild',
   },
 })

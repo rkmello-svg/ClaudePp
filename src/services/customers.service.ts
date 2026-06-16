@@ -1,6 +1,5 @@
 import { supabase } from '@/lib/supabase'
 import { Customer } from '@/types'
-import { PostgrestError } from '@supabase/supabase-js'
 
 export class CustomersService {
   static async list(companyId: string, branchId?: string) {

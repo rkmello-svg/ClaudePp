@@ -104,7 +104,6 @@ Forneça análises baseadas em dados. Seja específico com números.`
       .filter(i => i.status === 'overdue')
       .reduce((sum, i) => sum + i.total_amount, 0)
 
-    const today = new Date().toISOString().split('T')[0]
     const nextWeek = new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString().split('T')[0]
 
     const nextWeekIncoming = invoices
@@ -123,7 +122,7 @@ Forneça análises baseadas em dados. Seja específico com números.`
     }
   }
 
-  private async assessFinancialHealth(params: Record<string, any>) {
+  private async assessFinancialHealth(_params: Record<string, any>) {
     const { data: invoices } = await supabase
       .from('invoices')
       .select('total_amount, status')
@@ -169,7 +168,7 @@ Forneça análises baseadas em dados. Seja específico com números.`
     }
   }
 
-  private async getOverdueReceivables(params: Record<string, any>) {
+  private async getOverdueReceivables(_params: Record<string, any>) {
     const today = new Date().toISOString().split('T')[0]
 
     const { data: overdue } = await supabase
@@ -201,15 +200,18 @@ Forneça análises baseadas em dados. Seja específico com números.`
       return sum + days
     }, 0) / overdue.length
 
-    const invoiceList = overdue.map(inv => ({
-      invoice_id: inv.id,
-      number: inv.number,
-      amount: inv.total_amount,
-      days_overdue: Math.floor((Date.now() - new Date(inv.due_date).getTime()) / (24 * 60 * 60 * 1000)),
-      customer_name: inv.customer.name,
-      customer_email: inv.customer.email,
-      contact_phone: inv.customer.phone,
-    }))
+    const invoiceList = overdue.map(inv => {
+      const customer = Array.isArray(inv.customer) ? inv.customer[0] : inv.customer
+      return {
+        invoice_id: inv.id,
+        number: inv.number,
+        amount: inv.total_amount,
+        days_overdue: Math.floor((Date.now() - new Date(inv.due_date).getTime()) / (24 * 60 * 60 * 1000)),
+        customer_name: customer?.name ?? null,
+        customer_email: customer?.email ?? null,
+        contact_phone: customer?.phone ?? null,
+      }
+    })
 
     return {
       total_overdue_invoices: overdue.length,
@@ -221,7 +223,7 @@ Forneça análises baseadas em dados. Seja específico com números.`
     }
   }
 
-  private generateCashFlowRecommendation(incoming: number, overdue: number, pending: number): string {
+  private generateCashFlowRecommendation(incoming: number, overdue: number, _pending: number): string {
     if (incoming > overdue * 2) {
       return '✅ Fluxo de caixa saudável. Continue neste ritmo.'
     } else if (incoming > overdue) {
@@ -231,7 +233,7 @@ Forneça análises baseadas em dados. Seja específico com números.`
     }
   }
 
-  private generateHealthRecommendation(score: number, metrics: any): string {
+  private generateHealthRecommendation(_score: number, metrics: any): string {
     const recommendations = []
 
     if (metrics.payment_rate < 0.8) {
