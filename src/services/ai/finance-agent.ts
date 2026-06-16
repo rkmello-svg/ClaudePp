@@ -118,7 +118,6 @@ Forneça análises baseadas em dados. Seja específico com números.`
       net_cash_flow: parseFloat((paid - overdue).toFixed(2)),
       expected_next_7_days: parseFloat(nextWeekIncoming.toFixed(2)),
       cash_position: paid > overdue * 1.5 ? 'healthy' : paid > overdue ? 'stable' : 'strained',
-      recommendation: this.generateCashFlowRecommendation(paid, overdue, pending),
     }
   }
 
@@ -147,7 +146,6 @@ Forneça análises baseadas em dados. Seja específico com números.`
       .filter(i => i.status === 'overdue')
       .reduce((sum, i) => sum + i.total_amount, 0)
 
-    // Health score: 100 * (payment_rate * 0.6 + (1 - overdue/total_revenue) * 0.4)
     const healthScore = Math.max(
       0,
       100 * (paymentRate * 0.6 + Math.max(0, 1 - overdue / (totalRevenue || 1)) * 0.4),
@@ -158,13 +156,37 @@ Forneça análises baseadas em dados. Seja específico com números.`
       overdue_percentage: parseFloat(((overdue / totalRevenue) * 100).toFixed(1)),
       total_revenue: parseFloat(totalRevenue.toFixed(2)),
       total_overdue: parseFloat(overdue.toFixed(2)),
+      total_invoices: total,
+      paid_invoices: paid,
     }
+
+    const dataContext = `
+Análise Financeira da Empresa:
+- Taxa de Pagamento: ${metrics.payment_rate}%
+- Percentual de Atrasos: ${metrics.overdue_percentage}%
+- Receita Total: R$ ${metrics.total_revenue}
+- Total em Atraso: R$ ${metrics.total_overdue}
+- Total de Faturas: ${metrics.total_invoices}
+- Faturas Pagas: ${metrics.paid_invoices}
+
+Score de Saúde Financeira: ${healthScore.toFixed(1)}/100
+
+Forneça uma análise detalhada da saúde financeira com recomendações específicas de ações.`
+
+    const messages = [
+      {
+        role: 'user' as const,
+        content: dataContext,
+      },
+    ]
+
+    const llmAnalysis = await this.callLLM(messages, this.getTools())
 
     return {
       financial_health_score: parseFloat(healthScore.toFixed(1)),
       status: healthScore > 80 ? 'excellent' : healthScore > 60 ? 'good' : healthScore > 40 ? 'fair' : 'poor',
       metrics,
-      recommendation: this.generateHealthRecommendation(healthScore, metrics),
+      ai_analysis: llmAnalysis,
     }
   }
 
@@ -190,7 +212,7 @@ Forneça análises baseadas em dados. Seja específico com números.`
         total_overdue_invoices: 0,
         total_overdue_amount: 0,
         invoices: [],
-        collection_recommendation: 'Nenhuma cobrança pendente. Excelente!',
+        ai_collection_strategy: 'Nenhuma cobrança pendente. Excelente!',
       }
     }
 
@@ -213,51 +235,35 @@ Forneça análises baseadas em dados. Seja específico com números.`
       }
     })
 
+    const dataContext = `
+Faturas Vencidas (Contas a Receber):
+- Total de Faturas em Atraso: ${invoiceList.length}
+- Valor Total em Atraso: R$ ${totalAmount.toFixed(2)}
+- Dias Médios em Atraso: ${avgDaysOverdue.toFixed(0)}
+- Faturas Críticas (>30 dias): ${invoiceList.filter(i => i.days_overdue > 30).length}
+
+Detalhes das Faturas:
+${invoiceList.slice(0, 10).map(inv => `- NF ${inv.number}: R$ ${inv.amount} (${inv.days_overdue} dias) - ${inv.customer_name}`).join('\n')}
+
+Elabore uma estratégia de cobrança priorizada com ações específicas por fatura.`
+
+    const messages = [
+      {
+        role: 'user' as const,
+        content: dataContext,
+      },
+    ]
+
+    const llmStrategy = await this.callLLM(messages, this.getTools())
+
     return {
       total_overdue_invoices: overdue.length,
       total_overdue_amount: parseFloat(totalAmount.toFixed(2)),
       average_days_overdue: parseFloat(avgDaysOverdue.toFixed(1)),
       invoices: invoiceList,
       priority_invoices: invoiceList.filter(i => i.days_overdue > 30),
-      collection_recommendation: this.generateCollectionPlan(overdue.length, totalAmount, avgDaysOverdue),
+      ai_collection_strategy: llmStrategy,
     }
   }
 
-  private generateCashFlowRecommendation(incoming: number, overdue: number, _pending: number): string {
-    if (incoming > overdue * 2) {
-      return '✅ Fluxo de caixa saudável. Continue neste ritmo.'
-    } else if (incoming > overdue) {
-      return '⚠️ Fluxo de caixa estável. Monitore cobranças vencidas.'
-    } else {
-      return `🚨 ALERTA: Insuficiência de caixa! Priorize cobrança de R$ ${overdue.toFixed(2)} em atraso.`
-    }
-  }
-
-  private generateHealthRecommendation(_score: number, metrics: any): string {
-    const recommendations = []
-
-    if (metrics.payment_rate < 0.8) {
-      recommendations.push('Melhorar taxa de recebimento')
-    }
-
-    if (metrics.overdue_percentage > 10) {
-      recommendations.push('Intensificar cobrança de inadimplentes')
-    }
-
-    if (recommendations.length === 0) {
-      return '✅ Saúde financeira excelente!'
-    }
-
-    return recommendations.join('. ') + '.'
-  }
-
-  private generateCollectionPlan(count: number, amount: number, avgDays: number): string {
-    if (avgDays > 60) {
-      return `🚨 CRÍTICO: ${count} faturas vencidas há ${Math.floor(avgDays)} dias. Considere encaminhar para cobrança judicial. Total: R$ ${amount.toFixed(2)}`
-    } else if (avgDays > 30) {
-      return `⚠️ URGENTE: ${count} faturas vencidas há ${Math.floor(avgDays)} dias. Contate clientes imediatamente. Total: R$ ${amount.toFixed(2)}`
-    } else {
-      return `Acompanhar ${count} faturas vencidas. Contato de cobrança recomendado.`
-    }
-  }
 }

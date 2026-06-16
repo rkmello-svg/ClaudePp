@@ -103,7 +103,6 @@ Use fórmulas como: EOQ, Ponto de Reposição, Estoque de Segurança.`
       zero_stock_items: zeroStock,
       health_score: parseFloat(healthScore.toFixed(1)),
       status: healthScore > 80 ? 'healthy' : healthScore > 50 ? 'warning' : 'critical',
-      recommendation: this.generateInventoryRecommendation(healthScore, lowStock, zeroStock),
     }
   }
 
@@ -114,22 +113,20 @@ Use fórmulas como: EOQ, Ponto de Reposição, Estoque de Segurança.`
       .eq('company_id', this.company_id)
       .eq('active', true)
 
-    if (!products) return { recommendations: [] }
+    if (!products) return { ai_recommendations: 'Nenhum produto encontrado' }
 
     const recommendations = []
 
     for (const product of products) {
       if (product.stock_quantity < 10) {
-        // Simple EOQ calculation
-        // Assuming annual demand = monthly demand * 12
         const monthlyDemand = await this.estimateMonthlyDemand(product.id)
         const annualDemand = monthlyDemand * 12
 
-        const orderingCost = 50 // R$ per order
-        const holdingCost = (product.cost || product.price * 0.4) * 0.25 // 25% of unit cost annually
+        const orderingCost = 50
+        const holdingCost = (product.cost || product.price * 0.4) * 0.25
 
         const eoq = Math.sqrt((2 * annualDemand * orderingCost) / (holdingCost || 1))
-        const safetyStock = Math.ceil(monthlyDemand * 1.5) // 1.5 months buffer
+        const safetyStock = Math.ceil(monthlyDemand * 1.5)
         const reorderPoint = safetyStock + monthlyDemand
 
         recommendations.push({
@@ -145,10 +142,31 @@ Use fórmulas como: EOQ, Ponto de Reposição, Estoque de Segurança.`
       }
     }
 
+    const dataContext = `
+Análise de Reposição de Estoque:
+- Total de Produtos com Estoque Baixo: ${recommendations.length}
+- Total de Produtos Ativos: ${products.length}
+
+Produtos com Recomendação de Compra:
+${recommendations.slice(0, 10).map(r => `- ${r.product_name}: Estoque Atual ${r.current_stock}, EOQ recomendado: ${r.eoq} unidades, Demanda: ${r.estimated_monthly_demand}/mês`).join('\n')}
+
+Investimento Estimado Total: R$ ${recommendations.reduce((sum, r) => sum + r.eoq * 50, 0).toFixed(2)}
+
+Forneça uma estratégia otimizada de compra considerando cash flow e prioridades.`
+
+    const messages = [
+      {
+        role: 'user' as const,
+        content: dataContext,
+      },
+    ]
+
+    const llmRecommendations = await this.callLLM(messages, this.getTools())
+
     return {
       total_recommendations: recommendations.length,
-      estimated_total_investment: recommendations.reduce((sum, r) => sum + r.eoq * 100, 0), // Assuming cost
-      recommendations,
+      quantitative_data: recommendations,
+      ai_recommendations: llmRecommendations,
     }
   }
 
@@ -218,13 +236,4 @@ Use fórmulas como: EOQ, Ponto de Reposição, Estoque de Segurança.`
     return Math.ceil(data.reduce((sum, item) => sum + item.quantity, 0) / 1)
   }
 
-  private generateInventoryRecommendation(score: number, lowStock: number, zeroStock: number): string {
-    if (score > 80) {
-      return '✅ Estoque saudável. Continue monitorando.'
-    } else if (score > 50) {
-      return `⚠️ Atenção: ${lowStock} itens com estoque baixo. Revise reposições.`
-    } else {
-      return `🚨 CRÍTICO: ${zeroStock} itens sem estoque e ${lowStock} com estoque baixo. Ação imediata necessária!`
-    }
-  }
 }

@@ -162,39 +162,37 @@ Sempre cite dados e números específicos. Forneça recomendações acionáveis.
     const trends = await this.analyzeTrends({ period: 90 })
     const atRisk = await this.identifyAtRiskCustomers({ days: 30 })
 
-    const recommendations = []
+    const dataContext = `
+Dados de Vendas (90 dias):
+- Tendência: ${trends.trend}
+- Receita Total: R$ ${trends.total_revenue}
+- Ticket Médio: R$ ${trends.average_sale}
+- Total de Transações: ${trends.total_transactions}
+- Indicador de Tendência: ${trends.trend_indicator}%
 
-    // Sales trend recommendations
-    if (trends.trend === 'downward') {
-      recommendations.push({
-        priority: 'high',
-        category: 'Sales',
-        action: 'Aumentar atividades de marketing e vendas',
-        reason: `Vendas em queda. Tendência: ${trends.trend_indicator}% de atividade recente`,
-      })
-    }
+Clientes em Risco:
+- Total de Clientes em Risco: ${atRisk.at_risk_count}
+- Critério: Inatividade > 30 dias
+${atRisk.at_risk_customers.slice(0, 5).map((c: any) => `  - ${c.name}: ${c.days_inactive} dias inativo (${c.total_purchases} compras)`).join('\n')}
 
-    // At-risk customer recommendations
-    if (atRisk.at_risk_count > 0) {
-      recommendations.push({
-        priority: 'high',
-        category: 'Retention',
-        action: `Acompanhar ${atRisk.at_risk_count} clientes inativos`,
-        reason: `${atRisk.at_risk_count} clientes sem compras há mais de 30 dias`,
-      })
-    }
+Gere recomendações prioritárias e acionáveis para melhorar vendas e retenção.`
 
-    // Revenue optimization
-    recommendations.push({
-      priority: 'medium',
-      category: 'Growth',
-      action: 'Implementar programa de fidelização',
-      reason: `Ticket médio: R$ ${trends.average_sale}. Potencial de aumento: +15-20%`,
-    })
+    const messages = [
+      {
+        role: 'user' as const,
+        content: dataContext,
+      },
+    ]
+
+    const llmResponse = await this.callLLM(messages, this.getTools())
 
     return {
-      recommendations,
-      total_recommendations: recommendations.length,
+      analysis: llmResponse,
+      data_summary: {
+        trend: trends.trend,
+        total_revenue: trends.total_revenue,
+        at_risk_count: atRisk.at_risk_count,
+      },
       next_review: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString().split('T')[0],
     }
   }
