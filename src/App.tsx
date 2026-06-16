@@ -11,6 +11,7 @@ import DashboardPage from '@/pages/dashboard/DashboardPage'
 import CustomersPage from '@/pages/crm/CustomersPage'
 import ProductsPage from '@/pages/products/ProductsPage'
 import InvoicesPage from '@/pages/invoices/InvoicesPage'
+import FiscalPage from '@/pages/fiscal/FiscalPage'
 import LoadingPage from '@/pages/LoadingPage'
 
 function App() {
@@ -71,6 +72,14 @@ function App() {
               element={
                 <DashboardLayout>
                   <InvoicesPage />
+                </DashboardLayout>
+              }
+            />
+            <Route
+              path="/fiscal"
+              element={
+                <DashboardLayout>
+                  <FiscalPage />
                 </DashboardLayout>
               }
             />

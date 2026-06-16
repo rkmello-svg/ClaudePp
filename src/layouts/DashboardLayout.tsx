@@ -34,6 +34,7 @@ export function DashboardLayout({ children }: DashboardLayoutProps) {
     { name: 'Clientes', href: '/crm/customers', icon: Users },
     { name: 'Produtos', href: '/products', icon: Package },
     { name: 'Invoices', href: '/invoices', icon: FileText },
+    { name: 'Fiscal', href: '/fiscal', icon: FileText },
   ]
 
   return (
