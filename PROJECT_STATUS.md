@@ -1,273 +1,89 @@
-# ERP Enterprise OS - Project Status
+# ERP Enterprise OS — Project Status
 
-**Last Updated**: 2026-06-16  
-**Current Phase**: 4/5 - IA & Automation ✅  
-**Overall Progress**: 80%
+**Last Updated**: 2026-06-16
+**Phases scaffolded**: 5 / 5
+**Build**: ✅ `tsc` clean · `vite build` passes · `eslint` 0 errors · 11 unit tests passing
 
 ---
 
-## 📊 Completion Timeline
+## Verified state
+
+Everything below has been confirmed to compile and build:
 
 ```
-Phase 1: Fundação             ████████████████████ 100% ✅
-Phase 2: Core Business        ████████████████████ 100% ✅
-Phase 3: Fiscal               ████████████████████ 100% ✅
-Phase 4: IA & Automação       ████████████████████ 100% ✅
-Phase 5: Marketplace          ░░░░░░░░░░░░░░░░░░░░  0%  ⏳
+npx tsc --noEmit      # 0 errors
+npm run build         # 1598 modules, code-split, ~390kB main chunk
+npm run lint          # 0 errors (45 advisory `any` warnings)
+npx vitest run        # 11 tests passing
 ```
 
 ---
 
-## ✅ PHASE 1: FUNDAÇÃO (Semanas 1-2)
+## Phase 1 — Foundation ✅
+- React 18 + TypeScript + Tailwind + Vite (path alias `@`, env typing)
+- Supabase client, auth hook, Zustand store
+- Multi-tenant PostgreSQL schema with RLS, RBAC (5 roles), audit log
+- Migration `001_initial_schema.sql`
 
-### Completed
-- [x] React 18 + TypeScript + Tailwind setup
-- [x] Vite configuration
-- [x] Supabase integration
-- [x] PostgreSQL schema with RLS
-- [x] Authentication system
-- [x] Multi-tenant architecture
-- [x] RBAC (5 roles)
-- [x] Session management
-- [x] Type definitions
-- [x] Constants and utilities
-- [x] ESLint configuration
+## Phase 2 — Core Business ✅
+- Services: customers, products, invoices, dashboard
+- Reusable Table / Card / StatCard / CustomerForm (zod-validated)
+- Pages: Customers, Products, Invoices + responsive DashboardLayout
 
-### Database
-- [x] 9 core tables
-- [x] RLS policies on all tables
-- [x] 11 indexes for performance
-- [x] Audit logging capability
-- [x] Triggers for updated_at
+## Phase 3 — Fiscal ✅
+- Services: NF-e, eSocial, SPED (ECD/ECF/REINF), compliance + tax planning
+- FiscalPage with health score and obligations
+- Migration `002_fiscal_schema.sql`
+- ⚠️ SEFAZ / eSocial transmission is **simulated** — integration points are
+  isolated in `submitToSEFAZ` / `submitToeSocial` for real wiring later.
 
-**Commits**: 1 (feat: Initialize ERP Enterprise OS project foundation)
+## Phase 4 — AI ✅
+- BaseAgent framework + Sales / Inventory / Finance agents
+- Heuristic, data-driven analysis (trends, EOQ, cash flow, churn risk)
+- Migration `003` adds `ai_agent_executions` (agents previously logged to a
+  table that did not exist)
+- ⚠️ Agents use deterministic heuristics, not an LLM yet. LLM wiring is the
+  next step (Claude API).
 
----
-
-## ✅ PHASE 2: CORE BUSINESS (Semanas 3-4)
-
-### Services Layer
-- [x] CustomersService (CRUD, search, filtering)
-- [x] ProductsService (inventory, low stock alerts)
-- [x] InvoicesService (lifecycle, payment tracking)
-- [x] DashboardService (metrics, analytics)
-
-### Components
-- [x] Table (sortable, reusable)
-- [x] Card & StatCard (KPI display)
-- [x] CustomerForm (validation with zod)
-
-### Pages
-- [x] CustomersPage (list, search, CRUD)
-- [x] ProductsPage (inventory management)
-- [x] InvoicesPage (by status)
-- [x] DashboardLayout (sidebar, responsive)
-
-### Features
-- [x] Multi-tenant isolation
-- [x] Real-time data with Supabase
-- [x] Mobile-responsive layout
-- [x] Error handling
-- [x] Form validation
-
-**Commits**: 1 (feat: Implement Phase 2 - Core Business)
+## Phase 5 — Marketplace + Business DNA ✅
+- Marketplace catalog (8 seeded official modules), 1-click install/uninstall
+- `vertical_configurations` + per-segment config (`src/config/verticals.ts`)
+- Dashboard rewritten as adaptive "Central de Operações"
+- Migration `004_marketplace_schema.sql`
 
 ---
 
-## ✅ PHASE 3: FISCAL (Semanas 5-6)
-
-### Services
-- [x] NFeService (generation, authorization, cancellation)
-  - XML generation with CFe algorithm
-  - SEFAZ integration ready
-  - PDF generation ready
-- [x] eSocialService (employee events, admissions, payroll)
-  - Event type support
-  - Transmission protocol
-- [x] SPEDService (ECD, ECF, REINF)
-  - Multiple file types
-  - Format compliance
-- [x] ComplianceService (obligations, tax planning)
-  - Monthly obligation scheduling
-  - Multi-regime tax planning
-  - Health scoring
-
-### Database (002_fiscal_schema.sql)
-- [x] nfe table
-- [x] esocial_events table
-- [x] sped_files table
-- [x] fiscal_obligations table
-- [x] tax_planning table
-- [x] fiscal_certificates table
-- [x] fiscal_audit table
-
-### UI
-- [x] FiscalPage (compliance dashboard)
-- [x] Obligation tracking
-- [x] Health score indicator
-- [x] Document management
-
-**Commits**: 1 (feat: Implement Phase 3 - Fiscal)
+## Security fixes applied
+- **invoice_items had no RLS** → cross-tenant read leak. Fixed in migration
+  `003` with company-derived policies for select/insert/update/delete.
+- All new tables (AI, marketplace) ship with RLS from the start.
 
 ---
 
-## ✅ PHASE 4: IA & AUTOMAÇÃO (Semanas 7-8)
-
-### AI Framework
-- [x] BaseAgent (abstract class)
-- [x] Execution logging system
-- [x] Tool definition system
-- [x] Error handling
-
-### AI Agents
-- [x] SalesAgent
-  - Sales trend analysis (upward/downward/stable)
-  - At-risk customer identification
-  - Growth recommendations
-  
-- [x] InventoryAgent
-  - Health scoring
-  - EOQ calculations
-  - Safety stock calculations
-  - Slow-moving identification
-  
-- [x] FinanceAgent
-  - Cash flow analysis
-  - Financial health scoring
-  - Overdue tracking
-  - Collection planning
-
-### Features
-- [x] Real-time data analysis
-- [x] Actionable recommendations
-- [x] Priority levels
-- [x] Execution time tracking
-- [x] Data-driven insights (no hallucinations)
-
-**Commits**: 1 (feat: Implement Phase 4 - IA & Automation)
+## Known limitations / next steps
+1. Fiscal transmission (SEFAZ, eSocial) is simulated — needs real certificates
+   and webservice integration.
+2. AI agents are heuristic — wire to Claude API for natural-language reasoning.
+3. No E2E tests yet; unit tests cover pure logic (format, verticals).
+4. Several service helpers use `any` for Supabase payloads (advisory warnings).
+5. Builders (Module/Form/Workflow/Dashboard) and Communication Hub from the
+   product vision are not yet implemented.
 
 ---
 
-## ⏳ PHASE 5: MARKETPLACE (Semanas 9-10)
+## Migrations
+| File | Purpose |
+|------|---------|
+| 001_initial_schema.sql | Core multi-tenant tables + RLS |
+| 002_fiscal_schema.sql | NF-e, eSocial, SPED, obligations |
+| 003_ai_and_security_schema.sql | AI tables + invoice_items RLS fix |
+| 004_marketplace_schema.sql | Marketplace + verticals (seeded) |
 
-### Planned
-- [ ] Module management
-- [ ] Vertical configurations
-- [ ] Extension marketplace
-- [ ] Plugin system
-- [ ] Public API
-- [ ] Webhook system
-- [ ] Installation system
-
----
-
-## 📈 Key Metrics
-
-| Metric | Value |
-|--------|-------|
-| Total Files | 70+ |
-| Total Lines of Code | 5,000+ |
-| Database Tables | 16 |
-| React Components | 10+ |
-| Services | 10+ |
-| Commits | 4 |
-| Test Coverage | Ready for implementation |
-
----
-
-## 🏗️ Architecture
-
-### Frontend
-- React 18
-- TypeScript
-- Tailwind CSS
-- React Router
-- Zustand (state management)
-- React Hook Form
-- Lucide Icons
-
-### Backend
-- Supabase
-- PostgreSQL 15
-- Row Level Security (RLS)
-- Realtime
-- Auth
-
-### Features Ready
-- Multi-tenant isolation
-- RBAC (5 roles)
-- Audit logging
-- Fiscal compliance
-- AI agents
-- Real-time data
-
----
-
-## 🔐 Security Status
-
-- [x] RLS on all tables
-- [x] RBAC implemented
-- [x] MFA ready
-- [x] Audit logging
-- [x] Type safety
-- [x] Input validation
-- [x] LGPD ready
-
----
-
-## 📋 Next Steps
-
-### Immediate (Phase 5)
-1. Implement marketplace module system
-2. Create vertical configurations (Retail, Restaurant, etc)
-3. Build extension gallery
-4. Implement public API
-
-### Long-term
-1. AI model integration (Claude/OpenAI)
-2. Advanced analytics
-3. Mobile app
-4. Internationalization
-5. Performance optimization
-
----
-
-## 📞 Development Notes
-
-### Branch
-`claude/erp-enterprise-os-build-lmycvh`
-
-### Commands
+## Commands
 ```bash
 npm install
-npm run dev          # Start dev server
-npm run build        # Build for production
-npm run lint         # Run linter
-npm run test         # Run tests
+npm run dev          # dev server
+npm run build        # production build
+npm run lint         # advisory; lint:strict for zero-warning CI
+npx vitest run       # tests
 ```
-
-### Database Setup
-```bash
-npx supabase migration list
-npx supabase db push
-npx supabase db reset
-```
-
----
-
-## 🎯 Success Metrics
-
-- [x] 100% type safety with TypeScript
-- [x] All services with data-driven logic
-- [x] Complete fiscal module
-- [x] Multiple AI agents working
-- [x] Multi-tenant architecture
-- [x] Production-ready code
-- [ ] Phase 5: Marketplace complete
-- [ ] 1000+ test coverage
-
----
-
-**Status**: On track ✅  
-**Quality**: Production-ready  
-**Next Review**: Phase 5 kickoff
