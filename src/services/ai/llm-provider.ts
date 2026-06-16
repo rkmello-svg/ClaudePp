@@ -58,33 +58,30 @@ export class LLMProviderFactory {
     const normalizedName = (providerName || 'claude').toLowerCase()
 
     switch (normalizedName) {
-      case 'claude':
-        return this.createClaudeProvider(config)
-      case 'openai':
-        return this.createOpenAIProvider(config)
-      case 'gemini':
-        return this.createGeminiProvider(config)
-      default:
-        return this.createClaudeProvider(config)
+      case 'claude': {
+        // eslint-disable-next-line @typescript-eslint/no-var-requires
+        const { ClaudeProvider } = require('./providers/claude-provider')
+        return new ClaudeProvider(config)
+      }
+      case 'openai': {
+        // eslint-disable-next-line @typescript-eslint/no-var-requires
+        const { OpenAIProvider } = require('./providers/openai-provider')
+        return new OpenAIProvider(config)
+      }
+      case 'gemini': {
+        // eslint-disable-next-line @typescript-eslint/no-var-requires
+        const { GeminiProvider } = require('./providers/gemini-provider')
+        return new GeminiProvider(config)
+      }
+      default: {
+        // eslint-disable-next-line @typescript-eslint/no-var-requires
+        const { ClaudeProvider } = require('./providers/claude-provider')
+        return new ClaudeProvider(config)
+      }
     }
   }
 
-  private static createClaudeProvider(config?: LLMProviderConfig): LLMProvider {
-    const { ClaudeProvider } = require('./providers/claude-provider')
-    return new ClaudeProvider(config)
-  }
-
-  private static createOpenAIProvider(config?: LLMProviderConfig): LLMProvider {
-    const { OpenAIProvider } = require('./providers/openai-provider')
-    return new OpenAIProvider(config)
-  }
-
-  private static createGeminiProvider(config?: LLMProviderConfig): LLMProvider {
-    const { GeminiProvider } = require('./providers/gemini-provider')
-    return new GeminiProvider(config)
-  }
-
   static getDefaultProvider(): string {
-    return process.env.VITE_LLM_PROVIDER || 'claude'
+    return (typeof process !== 'undefined' && process.env?.VITE_LLM_PROVIDER) || 'claude'
   }
 }
